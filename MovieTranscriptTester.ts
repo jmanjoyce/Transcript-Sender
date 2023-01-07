@@ -1,49 +1,38 @@
 #!/usr/bin/env node
 
-const textbelt = require('textbelt');
+import { TwilioCodes } from "./twilioCodes.enum";
+
 
 async function sendMessages(){
-    const codes = {
-        TWILIO_ACCOUNT_SID: 'AC8ea9834cc85a66c9cd85a93de85f20d4',
-        TWILIO_AUTH_TOKEN: '2ed6b9aca5339635188964dab7d2f93b',
-
-    }
     const twilio = require('twilio');
-    const client = new twilio(codes.TWILIO_ACCOUNT_SID, codes.TWILIO_AUTH_TOKEN);
-    const messages = getMessages();
-    // client.messages 
-    //   .create({         
-    //      to: '+15082442757',
-    //      from: '+19035687286',
-    //      body: 'Hello',
-    //    }) 
-    //   .then(message => console.log(message.sid)) 
-    //   .done();
-    //const text = require('textbelt');
-
-    // US
-    var text = require('textbelt');
-
-    text('5082442757', 'A sample text message!', undefined, function(err) {
-        if (err) {
-            console.log(err);
-        }
-    });
-    // messages.array.forEach(element => {
-    //     wait(1000);
-
-    //     // client.messages.create({
-    //     //     to: '+17813825727',
-    //     //     from: '+19035687286',
-    //     //     body: element,
-    //     //   }).then(message => console.log(message.sid));
-    // });
+    const client = new twilio(TwilioCodes.TWILIO_ACCOUNT_SID, TwilioCodes.TWILIO_AUTH_TOKEN);
+    const messages: String[] = await getMessages();
+    client.messages 
+      .create({         
+         to: '+15082442757',
+         from: '+19035687286',
+         body: 'Beggining BroadCast of the BEE movie',
+       }) 
+      .then(message => console.log(message.sid)) 
+      .done();
+    const time = 1000;
+    const sleep = (slp) => new Promise((r) => setTimeout(r, slp));
+    if (messages[0] != 'error'){
+        messages.forEach(async element => {
+            await sleep(time);
+            client.messages.create({
+                to: '+17813825727',
+                from: '+19035687286',
+                body: element,
+            }).then(message => console.log(message.sid));
+        });
+    }
     return;
 };
 
 
 
-async function readTextFile(filePath) {
+async function readTextFile(filePath):Promise<String[]> {
     const fs = require('fs');
     return new Promise((resolve, reject) => {
         fs.readFile(filePath, 'utf8', (err, data) => {
@@ -57,7 +46,7 @@ async function readTextFile(filePath) {
     });
 }
 
-async function getMessages(){
+async function getMessages(): Promise<String[]>{
     console.log('reading Messages');
     try {
         const paragraphs = await readTextFile('beeTranscript.txt');
@@ -65,8 +54,8 @@ async function getMessages(){
         return paragraphs;
       } catch (err) {
         console.error('err');
+        return ['error'];
       }
 };
-
 
 let x = sendMessages();
